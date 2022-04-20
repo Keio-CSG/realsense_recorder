@@ -29,22 +29,27 @@ try:
         now = time.time()
         if (now - start) > n:
             n += 1
-        
+
         if not depth_frame or not color_frame:
             continue
 
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
-        
 
         # depth imageをカラーマップに変換
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(
-        depth_image, alpha=0.08), cv2.COLORMAP_JET)
+            depth_image, alpha=0.08), cv2.COLORMAP_JET)
         # Show images
         images = np.vstack((color_image, depth_colormap))
         cv2.imshow('color_image', images)
         cv2.waitKey(1)
+
+        k = cv2.waitKey(1)
+        if k & 0xff == 27:  # ESCで終了
+            cv2.destroyAllWindows()
+            break
+
 finally:
 
     # Stop streaming

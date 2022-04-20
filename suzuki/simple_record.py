@@ -12,6 +12,7 @@ config.enable_stream(rs.stream.color, 640, 360, rs.format.bgr8, 30)
 config.enable_stream(rs.stream.depth, 640, 360, rs.format.z16, 30)
 
 recording = False
+pause = False
 first_check = True
 
 # ストリーミング開始
@@ -67,38 +68,96 @@ try:
             if first_check:
                 print("Recording...")
                 recorder = rs.recorder("./data/recorded.bag", device)
-                record_start = time.time()
+                keep_timer = time.time()
                 first_check = False
+            if pause:
+                keep_timer = time.time()
             now = time.time()
-            if (now - record_start) > n+1:
+            if (now - keep_timer) > 1:
                 n += 1
+                keep_timer = time.time()
                 # print(f"Recording... {str(n)} seconds")
 
+            if not pause:
+                cv2.putText(color_image_s,
+                            "RECORDING_TIME: " +
+                            str(n) + " sec",
+                            (25, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            (0, 255, 0),
+                            2,
+                            cv2.LINE_4)
+                cv2.rectangle(color_image_s, (0, 0), (640, 357),
+                              (0, 255, 0), thickness=3)
+                cv2.putText(color_image_s,
+                            'Pause: "P"',
+                            (475, 25),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            (0, 255, 0),
+                            2,
+                            cv2.LINE_4)
+                cv2.putText(color_image_s,
+                            'Stop Recording: "Esc"',
+                            (373, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            (0, 255, 0),
+                            2,
+                            cv2.LINE_4)
+                cv2.rectangle(color_image_s, (0, 0), (640, 357),
+                              (0, 255, 0), thickness=3)
+            else:
+                cv2.putText(color_image_s,
+                            "PAUSING",
+                            (25, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            (0, 128, 0),
+                            2,
+                            cv2.LINE_4)
+                cv2.rectangle(color_image_s, (0, 0), (640, 357),
+                              (0, 128, 0), thickness=3)
+                cv2.putText(color_image_s,
+                            'Resume: "P"',
+                            (475, 25),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            (0, 255, 0),
+                            2,
+                            cv2.LINE_4)
+        else:
             cv2.putText(color_image_s,
-                        "RECORDING_TIME: " +
-                        str(n) + " sec",
-                        (25, 50),
+                        'Start Recording: "R"',
+                        (373, 25),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.7,
                         (0, 255, 0),
                         2,
                         cv2.LINE_4)
-            cv2.rectangle(color_image_s, (0, 0), (640, 357),
-                          (0, 255, 0), thickness=3)
 
         images = np.vstack((color_image_s, depth_colormap_s))
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         cv2.imshow('RealSense', images)
 
-        if cv2.waitKey(2) & 0xff == 27:  # ESCで終了
+        k = cv2.waitKey(1)
+        if k & 0xff == 27:  # ESCで終了
             cv2.destroyAllWindows()
             break
-
-        if cv2.waitKey(2) & 0xff == ord("r"):  # Rキーで録画開始
+        elif k == ord("r"):  # Rキーで録画開始
             recording = True
-
+        elif k == ord("p"):  # Rキーで録画開始
+            if recording:
+                if not pause:
+                    recorder.pause()
+                    pause = True
+                else:
+                    recorder.resume()
+                    pause = False
+            else:
+                print("Recording hasn't started yet")
 
 finally:
-
     # ストリーミング停止
     pipeline.stop()
