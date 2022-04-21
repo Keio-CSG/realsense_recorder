@@ -147,7 +147,7 @@ try:
             break
         elif k == ord("r"):  # Rキーで録画開始
             recording = True
-        elif k == ord("p"):  # Rキーで録画開始
+        elif k == ord("p"):  # Pキーでポーズ、再開
             if recording:
                 if not pause:
                     recorder.pause()
