@@ -5,6 +5,7 @@ import argparse
 import pyrealsense2 as rs
 import numpy as np
 import cv2
+from torch import float32
 
 class RecorderState(Enum):
     WAITING = auto()
@@ -32,6 +33,8 @@ def start_recorder(width: int, height: int, time_sec: float, frequency: int):
     recorded_depths = np.zeros((int(frequency*time_sec), height, width))
     time_start = None
 
+    top_bar_size = (56, 640, 3)
+
     try:
         while True:
             frames = pipeline.wait_for_frames()
@@ -52,10 +55,16 @@ def start_recorder(width: int, height: int, time_sec: float, frequency: int):
                 cv2.convertScaleAbs(depth_image, alpha=0.08), cv2.COLORMAP_JET
             )
 
+            top_bar = np.zeros(top_bar_size, dtype=np.uint8)
+            top_bar = cv2.putText(
+                top_bar, f"{width}x{height}",(400,50),
+                cv2.FONT_HERSHEY_PLAIN, 2, (0,0,200), 3
+            )
+
             if recorder_state == RecorderState.COUNTING:
                 count_down = 3 - (frame_counter // frequency)
-                color_image = cv2.putText(
-                    color_image, f"{int(count_down)}",(50,50),
+                top_bar = cv2.putText(
+                    top_bar, f"{int(count_down)}",(10,50),
                     cv2.FONT_HERSHEY_PLAIN, 2, (0,0,200), 3
                 )
                 if count_down == 0:
@@ -66,8 +75,8 @@ def start_recorder(width: int, height: int, time_sec: float, frequency: int):
             elif recorder_state == RecorderState.RECORDING:
                 recorded_colors[frame_counter-1,:,:,:] = color_image
                 recorded_depths[frame_counter-1,:,:] = depth_image
-                color_image = cv2.putText(
-                    color_image, f"REC",(50,50),
+                top_bar = cv2.putText(
+                    top_bar, f"REC",(10,50),
                     cv2.FONT_HERSHEY_PLAIN, 2, (0,0,200), 3
                 )
                 if frame_counter == recorded_colors.shape[0]:
@@ -84,13 +93,16 @@ def start_recorder(width: int, height: int, time_sec: float, frequency: int):
                     writer.release()
                     recorder_state = RecorderState.WAITING
             else:
-                color_image = cv2.putText(
-                    color_image, f"press r",(50,50),
+                top_bar = cv2.putText(
+                    top_bar, f"press r",(10,50),
                     cv2.FONT_HERSHEY_PLAIN, 2, (0,0,200), 3
                 )
 
+            color_image = cv2.resize(color_image, (640, 360))
+            depth_colormap = cv2.resize(depth_colormap, (640, 360))
+
             cv2.namedWindow("Recorder", cv2.WINDOW_AUTOSIZE)
-            cv2.imshow("Recorder", np.vstack((color_image, depth_colormap)))
+            cv2.imshow("Recorder", np.vstack((top_bar, color_image, depth_colormap)))
 
             k = cv2.waitKey(1)
             if k & 0xff == 27:
