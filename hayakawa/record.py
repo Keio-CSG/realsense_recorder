@@ -2,17 +2,33 @@ from enum import Enum, auto
 import time
 import datetime
 import argparse
+import os
 import pyrealsense2 as rs
 import numpy as np
 import cv2
-from torch import float32
 
 class RecorderState(Enum):
     WAITING = auto()
     COUNTING = auto()
     RECORDING = auto()
 
-def start_recorder(width: int, height: int, time_sec: float, frequency: int):
+def save_recorded_data(recorded_colors: np.ndarray, recorded_depths: np.ndarray, out_dir: str):
+    if os.path.exists(out_dir) is False:
+        os.makedirs(out_dir)
+    date_str = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    depth_path = str(os.path.join(out_dir, f"{date_str}-depth.npz"))
+    color_path = str(os.path.join(out_dir, f"{date_str}-rgb.avi"))
+    np.savez_compressed(
+        depth_path,
+        recorded_depths.astype(np.int16)
+    )
+    fmt = cv2.VideoWriter_fourcc(*"mp4v")
+    writer = cv2.VideoWriter(color_path, fmt, 30.0, (640,360))
+    for i in range(recorded_colors.shape[0]):
+        writer.write(recorded_colors[i,:,:,:])
+    writer.release()
+
+def start_recorder(width: int, height: int, time_sec: float, frequency: int, out_dir: str):
     # ストリーム(Depth/Color)の設定
     config = rs.config()
     config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, frequency)
@@ -81,16 +97,7 @@ def start_recorder(width: int, height: int, time_sec: float, frequency: int):
                 )
                 if frame_counter == recorded_colors.shape[0]:
                     print(f"save: {time.time() - time_start}s")
-                    date_str = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-                    np.savez_compressed(
-                        f"{date_str}-depth.npz",
-                        recorded_depths.astype(np.int16)
-                    )
-                    fmt = cv2.VideoWriter_fourcc(*"mp4v")
-                    writer = cv2.VideoWriter(f"{date_str}-rgb.avi", fmt, 30.0, (640,360))
-                    for i in range(recorded_colors.shape[0]):
-                        writer.write(recorded_colors[i,:,:,:])
-                    writer.release()
+                    save_recorded_data(recorded_colors, recorded_depths, out_dir)
                     recorder_state = RecorderState.WAITING
             else:
                 top_bar = cv2.putText(
@@ -142,14 +149,16 @@ if __name__ == "__main__":
     parser.add_argument("--height", type=int, default=None, help="vertical resolution")
     parser.add_argument("-t", "--time", type=float, default=10.0, help="recording time in second")
     parser.add_argument("-f", "--freq", type=int, default=30, help="camera frequency")
+    parser.add_argument("-o", "--out", default="", help="out directory")
     args = parser.parse_args()
     width = args.width
     height = args.height
     record_time_sec = args.time
     frequency = args.freq
+    out_dir = args.out
 
     try:
         width, height = resolve_resolution(width, height)
-        start_recorder(width, height, record_time_sec, frequency)
+        start_recorder(width, height, record_time_sec, frequency, out_dir)
     except BaseException as e:
         print(e)
