@@ -2,3 +2,5 @@
 *.avi
 *.bag
 *.json
+
+**/*/__pycache__
