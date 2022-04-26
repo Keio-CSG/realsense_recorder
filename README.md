@@ -69,3 +69,4 @@ suzuki > python simple_record.py
 -- 再生
 suzuki > python play.py 2022-04-26-19-05-11.bag
 ```
+bagファイルは大きいため、適宜zip圧縮してください
