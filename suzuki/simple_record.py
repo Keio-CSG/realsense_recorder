@@ -2,6 +2,7 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import time
+import datetime
 
 # ストリーム(Depth/Color)の設定
 config = rs.config()
@@ -66,8 +67,12 @@ try:
 
         if recording:
             if first_check:
+                now = datetime.datetime.now()
                 print("Recording...")
-                recorder = rs.recorder("./data/recorded.bag", device)
+                record_file = "./data/" + \
+                    now.strftime("%Y-%m-%d-%H-%M-%S") + ".bag"
+                print(f"file name = {record_file}")
+                recorder = rs.recorder(record_file, device)
                 keep_timer = time.time()
                 first_check = False
             if pause:

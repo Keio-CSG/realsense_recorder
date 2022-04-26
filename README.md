@@ -7,7 +7,7 @@
 - python-opencv
 - pyrealsense2
 
-anacondaの環境は`env.yaml`にあります
+anaconda の環境は`env.yaml`にあります
 
 ### 環境構築
 
@@ -25,7 +25,7 @@ anacondaの環境は`env.yaml`にあります
 -- 録画(横640ピクセル, 10秒)
 hayakawa > python record.py -w 640 -t 10
 -- 再生
-hayakawa > python replay.py 2022-04-23-23-12-50.json 
+hayakawa > python replay.py 2022-04-23-23-12-50.json
 ```
 
 オプション
@@ -48,7 +48,7 @@ optional arguments:
 ```
 
 ```
-hayakawa>python replay.py -h 
+hayakawa>python replay.py -h
 usage: replay.py [-h] [-d {blend,stack}] json
 
 positional arguments:
@@ -58,4 +58,14 @@ optional arguments:
   -h, --help            show this help message and exit
   -d {blend,stack}, --display {blend,stack}
                         display method
+```
+
+### suzuki
+
+```
+> cd suzuki
+-- 録画(横640ピクセル)
+suzuki > python simple_record.py
+-- 再生
+suzuki > python play.py 2022-04-26-19-05-11.bag
 ```
