@@ -5,42 +5,15 @@ import time
 import datetime
 import argparse
 import os
-import json
 import pyrealsense2 as rs
 import numpy as np
 import cv2
 
-from common import DisplayMethod
+from common import DisplayMethod, RecorderConfig
 
 class RecorderState(Enum):
     WAITING = auto()
     RECORDING = auto()
-
-class RecorderConfig():
-    """
-    レコーダの設定(主にjsonで出力する用途)
-    """
-    def __init__(self, width: int, height: int, time_sec: float, frequency: int, display: DisplayMethod) -> None:
-        self.width: int = width
-        self.height: int = height
-        self.time_sec: float = time_sec
-        self.frequency: int = frequency
-        self.display = display
-        self.time_str: str = None
-        self.depth_file: str = None
-        self.color_file: str = None
-
-    def toJson(self) -> str :
-        encoded = json.dumps({
-            "width": self.width,
-            "height": self.height,
-            "time_sec": self.time_sec,
-            "frequency": self.frequency,
-            "time": self.time_str,
-            "depth_file": self.depth_file,
-            "color_file": self.color_file
-        }, sort_keys=True, indent=2)
-        return encoded
 
 class SaveThread():
     def __init__(self, out_dir: str, config: RecorderConfig) -> None:
