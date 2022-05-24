@@ -60,6 +60,51 @@ optional arguments:
                         display method
 ```
 
+#### 動画をコマ送りで見る
+
+```
+> cd hayakawa
+hayakawa > python watch_frames.py 2022-04-23-23-12-50.json
+```
+
+`a`キーで前フレーム、`d`キーで次フレームに移動
+
+```
+hayakawa>python watch_frames.py -h
+usage: watch_frames.py [-h] [-d {stack,blend}] json
+
+positional arguments:
+  json                  configuration file path
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d {stack,blend}, --display {stack,blend}
+                        display method
+```
+
+#### 動画を切り取る
+
+```
+> cd hayakawa
+hayakawa > python clip.py 2022-04-23-23-12-50.json 100 200
+```
+
+100フレーム目から200フレーム目までを抽出する
+
+```
+hayakawa>python clip.py -h
+usage: clip.py [-h] [-o OUT] json start end
+
+positional arguments:
+  json               configuration file path
+  start              start frame
+  end                end frame
+
+optional arguments:
+  -h, --help         show this help message and exit
+  -o OUT, --out OUT  out directory
+```
+
 ### suzuki
 
 ```
