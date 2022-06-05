@@ -43,8 +43,8 @@ class SaveThread():
                 break
             color_image = received[0]
             depth_image = received[1]
-            self.recorded_colors[frame_counter-1,:,:,:] = color_image
-            self.recorded_depths[frame_counter-1,:,:] = depth_image
+            self.recorded_colors[frame_counter,:,:,:] = color_image
+            self.recorded_depths[frame_counter,:,:] = depth_image
             frame_counter += 1
 
         self.save_recorded_data(self.recorded_colors, self.recorded_depths, self.out_dir, self.config)
