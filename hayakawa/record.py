@@ -43,8 +43,8 @@ class SaveThread():
                 break
             color_image = received[0]
             depth_image = received[1]
-            self.recorded_colors[frame_counter-1,:,:,:] = color_image
-            self.recorded_depths[frame_counter-1,:,:] = depth_image
+            self.recorded_colors[frame_counter,:,:,:] = color_image
+            self.recorded_depths[frame_counter,:,:] = depth_image
             frame_counter += 1
 
         self.save_recorded_data(self.recorded_colors, self.recorded_depths, self.out_dir, self.config)
@@ -96,6 +96,11 @@ def start_recorder(recorder_config: RecorderConfig, out_dir: str):
     # ストリーミング開始
     pipeline = rs.pipeline()
     profile = pipeline.start(config)
+    depth_intrinsics = rs.video_stream_profile(profile.get_stream(rs.stream.depth)).get_intrinsics()
+    color_intrinsics = rs.video_stream_profile(profile.get_stream(rs.stream.color)).get_intrinsics()
+
+    recorder_config.intrinsics_color = color_intrinsics
+    recorder_config.intrinsics_depth = depth_intrinsics
 
     # Alignオブジェクト生成
     align_to = rs.stream.color
