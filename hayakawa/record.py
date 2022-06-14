@@ -214,14 +214,14 @@ def resolve_resolution(width, height, frequency):
             return width, 480, frequency
     if width == 1280:
         if height is None or height == 720:
-            return width, 720, 15
+            return width, 720, frequency
 
     height_str = height if height is not None else "-"
     raise ValueError(f"Not Supported Resolution: ({width},{height_str})")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--width", type=int, default=640, help="horizontal resolution")
+    parser.add_argument("-w", "--width", type=int, default=1280, help="horizontal resolution")
     parser.add_argument("--height", type=int, default=None, help="vertical resolution")
     parser.add_argument("-t", "--time", type=float, default=10.0, help="recording time in second")
     parser.add_argument("-f", "--freq", type=int, default=30, help="camera frequency")
